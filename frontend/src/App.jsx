@@ -1,15 +1,21 @@
+import Navbar from "./components/navigation/Navbar";
+
 function App() {
   return (
-    <div>
-      <h1>TransitIQ 🚍</h1>
-      <h2>Smart Transit for Hyderabad</h2>
+    <>
+      <Navbar />
 
-      <p>
-        Find buses, track them live, and plan your journey easily.
-      </p>
+      <main>
+        <h1>TransitIQ 🚍</h1>
+        <h2>Smart Transit for Hyderabad</h2>
 
-      <button>Find Buses</button>
-    </div>
+        <p>
+          Find buses, track them live, and plan your journey easily.
+        </p>
+
+        <button>Find Buses</button>
+      </main>
+    </>
   );
 }
 
