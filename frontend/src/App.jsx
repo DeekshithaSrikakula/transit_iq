@@ -93,6 +93,46 @@ function App() {
         <SearchBox />
 
         <section className="features-section">
+          <section className="how-it-works">
+  <div className="section-heading">
+    <span>HOW TRANSITIQ WORKS</span>
+    <h2>Your journey, made simple.</h2>
+  </div>
+
+  <div className="steps-grid">
+    <div className="step-card">
+      <div className="step-number">01</div>
+      <h3>Search</h3>
+      <p>
+        Enter where you are and where you want to go.
+      </p>
+    </div>
+
+    <div className="step-card">
+      <div className="step-number">02</div>
+      <h3>Choose a route</h3>
+      <p>
+        Compare available buses and choose the route that works best for you.
+      </p>
+    </div>
+
+    <div className="step-card">
+      <div className="step-number">03</div>
+      <h3>Track your bus</h3>
+      <p>
+        Follow your bus in real time and see its expected arrival.
+      </p>
+    </div>
+
+    <div className="step-card">
+      <div className="step-number">04</div>
+      <h3>Reach your destination</h3>
+      <p>
+        Travel confidently with live updates throughout your journey.
+      </p>
+    </div>
+  </div>
+</section>
           <div className="section-heading">
             <span>WHY TRANSITIQ</span>
             <h2>Everything you need for a better journey.</h2>
