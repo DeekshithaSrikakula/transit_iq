@@ -9,20 +9,33 @@ import {
   Truck,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("passenger");
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleLogin = (event) => {
+    event.preventDefault();
+
+    // Temporary frontend login.
+    // Backend authentication will be connected later.
 
     if (role === "passenger") {
-      window.location.href = "/passenger";
-    } else if (role === "driver") {
-      window.location.href = "/driver";
-    } else if (role === "operator") {
-      window.location.href = "/operator";
+      navigate("/passenger");
+    }
+
+    if (role === "driver") {
+      navigate("/driver");
+    }
+
+    if (role === "operator") {
+      navigate("/operator");
     }
   };
 
@@ -30,9 +43,12 @@ function Login() {
     <div className="auth-page">
       <div className="auth-container">
 
-        {/* LEFT VISUAL SECTION */}
+        {/* =========================
+            LEFT VISUAL SECTION
+        ========================== */}
 
         <section className="auth-visual">
+
           <a href="/" className="auth-brand">
             <div className="auth-brand-icon">
               <BusFront size={20} />
@@ -42,6 +58,7 @@ function Login() {
           </a>
 
           <div className="auth-visual-content">
+
             <span className="auth-eyebrow">
               SMART URBAN MOBILITY
             </span>
@@ -58,6 +75,7 @@ function Login() {
             </p>
 
             <div className="auth-stats">
+
               <div>
                 <strong>128+</strong>
                 <span>Active buses</span>
@@ -72,11 +90,15 @@ function Login() {
                 <strong>1,240+</strong>
                 <span>Stops</span>
               </div>
+
             </div>
+
           </div>
         </section>
 
-        {/* RIGHT LOGIN SECTION */}
+        {/* =========================
+            RIGHT LOGIN SECTION
+        ========================== */}
 
         <section className="auth-form-section">
 
@@ -87,19 +109,25 @@ function Login() {
 
           <div className="login-card">
 
-            {/* HEADING */}
+            {/* Heading */}
 
             <div className="login-heading">
+
               <span>WELCOME BACK</span>
 
-              <h2>Sign in to TransitIQ</h2>
+              <h2>
+                Sign in to TransitIQ
+              </h2>
 
               <p>
                 Access your journeys, live buses, and saved routes.
               </p>
+
             </div>
 
-            {/* ROLE SELECTION */}
+            {/* =========================
+                ROLE SELECTOR
+            ========================== */}
 
             <div className="role-selector">
 
@@ -144,34 +172,45 @@ function Login() {
 
             </div>
 
-            {/* LOGIN FORM */}
+            {/* =========================
+                LOGIN FORM
+            ========================== */}
 
             <form onSubmit={handleLogin}>
 
-              {/* EMAIL */}
+              {/* Email */}
 
               <div className="form-group">
+
                 <label htmlFor="email">
                   Email address
                 </label>
 
                 <div className="input-wrapper">
+
                   <Mail size={18} />
 
                   <input
                     id="email"
                     type="email"
+                    value={email}
+                    onChange={(event) =>
+                      setEmail(event.target.value)
+                    }
                     placeholder="you@example.com"
                     required
                   />
+
                 </div>
+
               </div>
 
-              {/* PASSWORD */}
+              {/* Password */}
 
               <div className="form-group">
 
                 <div className="password-label">
+
                   <label htmlFor="password">
                     Password
                   </label>
@@ -179,6 +218,7 @@ function Login() {
                   <a href="/forgot-password">
                     Forgot password?
                   </a>
+
                 </div>
 
                 <div className="input-wrapper">
@@ -191,6 +231,10 @@ function Login() {
                       showPassword
                         ? "text"
                         : "password"
+                    }
+                    value={password}
+                    onChange={(event) =>
+                      setPassword(event.target.value)
                     }
                     placeholder="Enter your password"
                     required
@@ -216,9 +260,10 @@ function Login() {
                   </button>
 
                 </div>
+
               </div>
 
-              {/* SIGN IN */}
+              {/* Submit */}
 
               <button
                 type="submit"
@@ -229,13 +274,16 @@ function Login() {
 
             </form>
 
-            {/* REGISTER */}
+            {/* Register */}
 
             <div className="signup-text">
+
               Don't have an account?
+
               <a href="/register">
                 Create an account
               </a>
+
             </div>
 
           </div>
