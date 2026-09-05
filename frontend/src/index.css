@@ -3310,3 +3310,26 @@ button {
     display: none;
   }
 }
+/* ===============================
+   AUTH ERROR
+=============================== */
+
+.auth-error {
+  margin: 14px 0;
+
+  padding: 11px 13px;
+
+  border: 1px solid #f1caca;
+  border-radius: 8px;
+
+  background: #fff5f5;
+  color: #c43d3d;
+
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.auth-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

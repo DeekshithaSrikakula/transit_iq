@@ -8,6 +8,7 @@ import {
   UserRound,
   Truck,
 } from "lucide-react";
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -18,43 +19,176 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  const handleLogin = (event) => {
+  // ==========================================
+  // LOGIN
+  // ==========================================
+
+  const handleLogin = async (event) => {
     event.preventDefault();
 
-    // Temporary frontend login.
-    // Backend authentication will be connected later.
+    setError("");
+    setLoading(true);
 
-    if (role === "passenger") {
-      navigate("/passenger");
-    }
+    try {
+      // Remove any old login information first.
+      // This prevents an old valid token from being reused.
+      localStorage.removeItem("transitiq_token");
+      localStorage.removeItem("transitiq_user");
 
-    if (role === "driver") {
-      navigate("/driver");
-    }
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
 
-    if (role === "operator") {
-      navigate("/operator");
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email: email.trim(),
+            password: password,
+            role: role,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("Login response:", data);
+      console.log("Login status:", response.status);
+
+      // ==========================================
+      // LOGIN FAILED
+      // ==========================================
+
+      if (!response.ok || data.success !== true) {
+        setError(
+          data.message || "Invalid email, password or role"
+        );
+
+        setLoading(false);
+
+        // VERY IMPORTANT:
+        // Stop here. Do NOT navigate.
+        return;
+      }
+
+      // ==========================================
+      // CHECK TOKEN
+      // ==========================================
+
+      if (!data.token) {
+        setError("Login failed. No authentication token received.");
+        setLoading(false);
+        return;
+      }
+
+      // ==========================================
+      // CHECK USER
+      // ==========================================
+
+      if (!data.user || !data.user.role) {
+        setError("Login failed. User information is missing.");
+        setLoading(false);
+        return;
+      }
+
+      // ==========================================
+      // CHECK ROLE
+      // ==========================================
+
+      if (data.user.role !== role) {
+        setError("Selected role does not match the account.");
+        setLoading(false);
+        return;
+      }
+
+      // ==========================================
+      // LOGIN SUCCESSFUL
+      // ==========================================
+
+      localStorage.setItem(
+        "transitiq_token",
+        data.token
+      );
+
+      localStorage.setItem(
+        "transitiq_user",
+        JSON.stringify(data.user)
+      );
+
+      console.log("Login successful");
+      console.log("User:", data.user);
+      console.log("Role:", data.user.role);
+
+      // ==========================================
+      // ROLE-BASED REDIRECT
+      // ==========================================
+
+      switch (data.user.role) {
+        case "passenger":
+          navigate("/passenger", { replace: true });
+          break;
+
+        case "driver":
+          navigate("/driver", { replace: true });
+          break;
+
+        case "operator":
+          navigate("/operator", { replace: true });
+          break;
+
+        default:
+          localStorage.removeItem("transitiq_token");
+          localStorage.removeItem("transitiq_user");
+
+          setError("Invalid user role.");
+          break;
+      }
+
+    } catch (error) {
+      console.error("Login error:", error);
+
+      setError(
+        "Unable to connect to the server. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // ==========================================
+  // CHANGE ROLE
+  // ==========================================
+
+  const changeRole = (newRole) => {
+    setRole(newRole);
+    setError("");
   };
 
   return (
     <div className="auth-page">
       <div className="auth-container">
 
-        {/* =========================
-            LEFT VISUAL SECTION
-        ========================== */}
+        {/* =====================================
+            LEFT SECTION
+        ====================================== */}
 
         <section className="auth-visual">
 
           <a href="/" className="auth-brand">
+
             <div className="auth-brand-icon">
               <BusFront size={20} />
             </div>
 
             TransitIQ
+
           </a>
 
           <div className="auth-visual-content">
@@ -70,8 +204,8 @@ function Login() {
             </h1>
 
             <p>
-              Plan your journey, discover better routes, and
-              track your bus in real time.
+              Plan your journey, discover better routes,
+              and track your bus in real time.
             </p>
 
             <div className="auth-stats">
@@ -94,42 +228,53 @@ function Login() {
             </div>
 
           </div>
+
         </section>
 
-        {/* =========================
+        {/* =====================================
             RIGHT LOGIN SECTION
-        ========================== */}
+        ====================================== */}
 
         <section className="auth-form-section">
 
           <a href="/" className="back-link">
+
             <ArrowLeft size={16} />
+
             Back to home
+
           </a>
 
           <div className="login-card">
 
-            {/* Heading */}
+            {/* =================================
+                HEADING
+            ================================== */}
 
             <div className="login-heading">
 
-              <span>WELCOME BACK</span>
+              <span>
+                WELCOME BACK
+              </span>
 
               <h2>
                 Sign in to TransitIQ
               </h2>
 
               <p>
-                Access your journeys, live buses, and saved routes.
+                Access your journeys, live buses,
+                and saved routes.
               </p>
 
             </div>
 
-            {/* =========================
+            {/* =================================
                 ROLE SELECTOR
-            ========================== */}
+            ================================== */}
 
             <div className="role-selector">
+
+              {/* PASSENGER */}
 
               <button
                 type="button"
@@ -138,11 +283,15 @@ function Login() {
                     ? "role-option active"
                     : "role-option"
                 }
-                onClick={() => setRole("passenger")}
+                onClick={() =>
+                  changeRole("passenger")
+                }
               >
                 <UserRound size={16} />
                 <span>Passenger</span>
               </button>
+
+              {/* DRIVER */}
 
               <button
                 type="button"
@@ -151,11 +300,15 @@ function Login() {
                     ? "role-option active"
                     : "role-option"
                 }
-                onClick={() => setRole("driver")}
+                onClick={() =>
+                  changeRole("driver")
+                }
               >
                 <BusFront size={16} />
                 <span>Driver</span>
               </button>
+
+              {/* OPERATOR */}
 
               <button
                 type="button"
@@ -164,7 +317,9 @@ function Login() {
                     ? "role-option active"
                     : "role-option"
                 }
-                onClick={() => setRole("operator")}
+                onClick={() =>
+                  changeRole("operator")
+                }
               >
                 <Truck size={16} />
                 <span>Operator</span>
@@ -172,13 +327,23 @@ function Login() {
 
             </div>
 
-            {/* =========================
-                LOGIN FORM
-            ========================== */}
+            {/* =================================
+                ERROR
+            ================================== */}
+
+            {error && (
+              <div className="auth-error">
+                {error}
+              </div>
+            )}
+
+            {/* =================================
+                FORM
+            ================================== */}
 
             <form onSubmit={handleLogin}>
 
-              {/* Email */}
+              {/* EMAIL */}
 
               <div className="form-group">
 
@@ -193,11 +358,11 @@ function Login() {
                   <input
                     id="email"
                     type="email"
+                    placeholder="you@example.com"
                     value={email}
                     onChange={(event) =>
                       setEmail(event.target.value)
                     }
-                    placeholder="you@example.com"
                     required
                   />
 
@@ -205,7 +370,7 @@ function Login() {
 
               </div>
 
-              {/* Password */}
+              {/* PASSWORD */}
 
               <div className="form-group">
 
@@ -232,11 +397,11 @@ function Login() {
                         ? "text"
                         : "password"
                     }
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(event) =>
                       setPassword(event.target.value)
                     }
-                    placeholder="Enter your password"
                     required
                   />
 
@@ -263,18 +428,25 @@ function Login() {
 
               </div>
 
-              {/* Submit */}
+              {/* =================================
+                  SUBMIT
+              ================================== */}
 
               <button
                 type="submit"
                 className="auth-submit"
+                disabled={loading}
               >
-                Sign in
+                {loading
+                  ? "Signing in..."
+                  : "Sign in"}
               </button>
 
             </form>
 
-            {/* Register */}
+            {/* =================================
+                REGISTER
+            ================================== */}
 
             <div className="signup-text">
 
@@ -287,6 +459,7 @@ function Login() {
             </div>
 
           </div>
+
         </section>
 
       </div>
