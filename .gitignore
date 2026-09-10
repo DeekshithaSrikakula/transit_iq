@@ -7,6 +7,8 @@ node_modules/
 **/.env
 backend/.env
 !.env.example
+local_users.json
+**/local_users.json
 
 # Build files
 dist/

@@ -12,14 +12,21 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 function Login() {
+  const location = useLocation();
+  const registeredEmail = location.state?.email;
+  const registeredRole = location.state?.role;
+
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState("passenger");
-  const [email, setEmail] = useState("passenger@test.com");
-  const [password, setPassword] = useState("password");
+  const [role, setRole] = useState(registeredRole || "passenger");
+  const [email, setEmail] = useState(registeredEmail || "passenger@test.com");
+  const [password, setPassword] = useState(registeredEmail ? "" : "password");
   const [error, setError] = useState("");
+  const [infoMessage, setInfoMessage] = useState(
+    registeredEmail ? "Account created successfully! Enter your password to sign in." : ""
+  );
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -65,12 +72,6 @@ function Login() {
         return;
       }
 
-      if (data.user.role !== role) {
-        setError("Selected role does not match this account.");
-        setLoading(false);
-        return;
-      }
-
       localStorage.setItem("transitiq_token", data.token);
       localStorage.setItem("transitiq_user", JSON.stringify(data.user));
 
@@ -85,9 +86,7 @@ function Login() {
           navigate("/operator", { replace: true });
           break;
         default:
-          localStorage.removeItem("transitiq_token");
-          localStorage.removeItem("transitiq_user");
-          setError("Unrecognized account role.");
+          navigate("/passenger", { replace: true });
           break;
       }
     } catch (err) {
@@ -101,13 +100,43 @@ function Login() {
   const changeRole = (newRole) => {
     setRole(newRole);
     setError("");
-    if (newRole === "passenger") {
+    const isDemoEmail =
+      !email ||
+      email === "passenger@test.com" ||
+      email === "driver@test.com" ||
+      email === "operator@test.com";
+
+    if (isDemoEmail) {
+      if (newRole === "passenger") {
+        setEmail("passenger@test.com");
+        setPassword("password");
+      } else if (newRole === "driver") {
+        setEmail("driver@test.com");
+        setPassword("password");
+      } else if (newRole === "operator") {
+        setEmail("operator@test.com");
+        setPassword("password");
+      }
+    }
+  };
+
+  const handleClear = () => {
+    setEmail("");
+    setPassword("");
+    setError("");
+    setInfoMessage("Enter your personal email and password below.");
+  };
+
+  const handleLoadDemo = () => {
+    setError("");
+    setInfoMessage("");
+    if (role === "passenger") {
       setEmail("passenger@test.com");
       setPassword("password");
-    } else if (newRole === "driver") {
+    } else if (role === "driver") {
       setEmail("driver@test.com");
       setPassword("password");
-    } else if (newRole === "operator") {
+    } else if (role === "operator") {
       setEmail("operator@test.com");
       setPassword("password");
     }
@@ -216,25 +245,68 @@ function Login() {
             </button>
           </div>
 
-          {/* Quick Demo Hint */}
+          {/* Info / Success Message from Registration */}
+          {infoMessage && (
+            <div
+              style={{
+                background: "rgba(16, 185, 129, 0.15)",
+                border: "1px solid rgba(16, 185, 129, 0.35)",
+                borderRadius: "10px",
+                padding: "10px 14px",
+                marginBottom: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "12px",
+                color: "#34d399",
+              }}
+            >
+              <CheckCircle2 size={16} color="#34d399" style={{ flexShrink: 0 }} />
+              <span>{infoMessage}</span>
+            </div>
+          )}
+
+          {/* Quick Demo vs Custom toggles */}
           <div
             style={{
-              background: "rgba(99, 102, 241, 0.1)",
-              border: "1px solid rgba(99, 102, 241, 0.25)",
-              borderRadius: "10px",
-              padding: "10px 14px",
-              marginBottom: "18px",
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
-              gap: "10px",
-              fontSize: "12px",
-              color: "#c7d2fe",
+              marginBottom: "14px",
+              padding: "0 2px",
             }}
           >
-            <Sparkles size={16} color="#818cf8" style={{ flexShrink: 0 }} />
-            <span>
-              <strong>Demo credentials preloaded:</strong> Just click &ldquo;Sign in&rdquo; below or switch roles above to test!
-            </span>
+            <button
+              type="button"
+              onClick={handleClear}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#38bdf8",
+                cursor: "pointer",
+                fontWeight: 600,
+                fontSize: "12px",
+                padding: 0,
+                textDecoration: "underline",
+              }}
+            >
+              Clear & enter your credentials
+            </button>
+            <button
+              type="button"
+              onClick={handleLoadDemo}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                fontWeight: 600,
+                fontSize: "12px",
+                padding: 0,
+              }}
+            >
+              Load demo credentials
+            </button>
           </div>
 
           {error && <div className="auth-error">{error}</div>}

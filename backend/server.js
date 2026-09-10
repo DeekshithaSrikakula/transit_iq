@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
@@ -96,30 +98,49 @@ let INCIDENTS = [
   },
 ];
 
-// In-memory fallback user database
-const fallbackUsers = [];
+// Local persistent JSON storage for resilient user accounts
+const LOCAL_USERS_FILE = path.join(__dirname, "local_users.json");
+let fallbackUsers = [];
 
-// Helper to seed fallback accounts
+// Helper to seed or load fallback accounts
 async function seedFallbackUsers() {
   const defaultAccounts = [
-    { email: "passenger@test.com", password: "password", name: "Test Passenger", role: "passenger" },
-    { email: "passenger@transitiq.com", password: "passenger123", name: "Amit Patel", role: "passenger" },
-    { email: "driver@test.com", password: "password", name: "Test Driver", role: "driver" },
+    { email: "passenger@test.com", password: "password", name: "Deekshitha", role: "passenger" },
+    { email: "driver@test.com", password: "password", name: "Mohammad Ali", role: "driver" },
+    { email: "operator@test.com", password: "password", name: "Rajesh Kumar", role: "operator" },
+    { email: "passenger@transitiq.com", password: "passenger123", name: "Deekshitha", role: "passenger" },
     { email: "driver1@transitiq.com", password: "driver123", name: "Mohammad Ali", role: "driver" },
-    { email: "operator@test.com", password: "password", name: "Test Operator", role: "operator" },
     { email: "operator@transitiq.com", password: "operator123", name: "Rajesh Kumar", role: "operator" },
   ];
 
+  if (fs.existsSync(LOCAL_USERS_FILE)) {
+    try {
+      const raw = fs.readFileSync(LOCAL_USERS_FILE, "utf-8");
+      fallbackUsers = JSON.parse(raw);
+    } catch (e) {
+      console.warn("Could not read local_users.json, initializing fresh pool:", e.message);
+    }
+  }
+
+  // Ensure default demo accounts exist
   for (const acc of defaultAccounts) {
-    const hash = await bcrypt.hash(acc.password, 10);
-    fallbackUsers.push({
-      _id: acc.email,
-      email: acc.email.toLowerCase(),
-      name: acc.name,
-      password: hash,
-      role: acc.role,
-      createdAt: new Date(),
-    });
+    if (!fallbackUsers.some((u) => u.email.toLowerCase() === acc.email.toLowerCase())) {
+      const hash = await bcrypt.hash(acc.password, 10);
+      fallbackUsers.push({
+        _id: acc.email,
+        email: acc.email.toLowerCase(),
+        name: acc.name,
+        password: hash,
+        role: acc.role,
+        createdAt: new Date(),
+      });
+    }
+  }
+
+  try {
+    fs.writeFileSync(LOCAL_USERS_FILE, JSON.stringify(fallbackUsers, null, 2));
+  } catch (err) {
+    console.error("Could not write local_users.json:", err);
   }
 }
 seedFallbackUsers();
@@ -153,7 +174,7 @@ async function initDatabase() {
   }
 }
 
-// Database user abstraction
+// Database user abstraction with persistent fallback
 const dbService = {
   async findUser(email, role) {
     if (!useFallbackDb && mongoDbInstance) {
@@ -173,6 +194,11 @@ const dbService = {
     }
     userData._id = Date.now().toString();
     fallbackUsers.push(userData);
+    try {
+      fs.writeFileSync(LOCAL_USERS_FILE, JSON.stringify(fallbackUsers, null, 2));
+    } catch (err) {
+      console.error("Could not write to local_users.json:", err);
+    }
     return userData._id;
   },
 };
@@ -189,7 +215,7 @@ app.post("/api/auth/register", async (req, res) => {
 
     const existing = await dbService.findUser(email);
     if (existing) {
-      return res.status(409).json({ success: false, message: "User already exists" });
+      return res.status(409).json({ success: false, message: "An account with this email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -210,18 +236,28 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ success: false, message: "Email and password are required" });
     }
 
-    const user = await dbService.findUser(email, role);
+    // Lookup user by email
+    const user = await dbService.findUser(email);
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid email, password, or role" });
+      return res.status(401).json({
+        success: false,
+        message: `No account registered with email "${email}". Please register your credentials first.`,
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid email, password, or role" });
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password. Please verify your credentials and try again.",
+      });
     }
 
+    // Resolve user role
+    const effectiveRole = user.role || role || "passenger";
+
     const token = jwt.sign(
-      { userId: user._id.toString(), role: user.role, email: user.email, name: user.name },
+      { userId: user._id.toString(), role: effectiveRole, email: user.email, name: user.name },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -230,11 +266,11 @@ app.post("/api/auth/login", async (req, res) => {
       success: true,
       message: "Login successful",
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { id: user._id, name: user.name, email: user.email, role: effectiveRole },
     });
   } catch (err) {
     console.error("Login error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error during login" });
   }
 });
 

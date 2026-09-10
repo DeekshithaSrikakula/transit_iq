@@ -70,8 +70,8 @@ function Register() {
 
       setSuccess("Account successfully registered! Redirecting to sign in...");
       setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+        navigate("/login", { state: { email: email.trim(), role } });
+      }, 1200);
     } catch {
       // If endpoint is unreachable, show clear error
       setError("Unable to connect to transit server. You can sign in immediately using preloaded demo accounts.");
