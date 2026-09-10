@@ -1,4 +1,4 @@
-import { ArrowRight, MapPin, Search, Bus, Clock, Navigation } from "lucide-react";
+import { ArrowRight, MapPin, Search, Bus, Clock, Navigation, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -37,8 +37,15 @@ function SearchBox() {
     // Determine matching routes based on query
     let matched = [];
 
-    const isSouth = to.includes("charminar") || to.includes("koti") || to.includes("assembly") || to.includes("khairatabad");
-    const isWest = to.includes("gachibowli") || to.includes("hitech") || to.includes("madhapur");
+    const isSouth =
+      to.includes("charminar") ||
+      to.includes("koti") ||
+      to.includes("assembly") ||
+      to.includes("khairatabad");
+    const isWest =
+      to.includes("gachibowli") ||
+      to.includes("hitech") ||
+      to.includes("madhapur");
 
     if (isSouth) {
       matched.push({
@@ -50,6 +57,7 @@ function SearchBox() {
         fare: "₹25",
         status: "High Frequency",
         stopsCount: 10,
+        type: "Direct Trunk",
       });
     } else if (isWest) {
       matched.push({
@@ -61,6 +69,7 @@ function SearchBox() {
         fare: "₹35",
         status: "Express AC",
         stopsCount: 8,
+        type: "IT Express",
       });
     } else {
       // Default both routes
@@ -74,6 +83,7 @@ function SearchBox() {
           fare: "₹25",
           status: "High Frequency",
           stopsCount: 10,
+          type: "Direct Trunk",
         },
         {
           id: 2,
@@ -84,6 +94,7 @@ function SearchBox() {
           fare: "₹35",
           status: "Express AC",
           stopsCount: 8,
+          type: "IT Express",
         },
       ];
     }
@@ -92,12 +103,16 @@ function SearchBox() {
   };
 
   const handleTrackRoute = (routeId) => {
-    // If user not logged in, set default guest session so they can view the dashboard
+    // If user not logged in, set default passenger session so they can immediately view the live tracking map
     if (!localStorage.getItem("transitiq_token")) {
-      localStorage.setItem("transitiq_token", "guest_token");
+      localStorage.setItem("transitiq_token", "demo_passenger");
       localStorage.setItem(
         "transitiq_user",
-        JSON.stringify({ name: "Guest Passenger", role: "passenger", email: "guest@transitiq.com" })
+        JSON.stringify({
+          name: "Guest Passenger",
+          role: "passenger",
+          email: "passenger@test.com",
+        })
       );
     }
     navigate("/passenger");
@@ -108,21 +123,21 @@ function SearchBox() {
       <div className="journey-card">
         <div className="journey-heading">
           <div>
-            <span>PLAN YOUR JOURNEY</span>
-            <h2>Where do you want to go?</h2>
+            <span>INTELLIGENT TRANSIT ROUTING</span>
+            <h2>Where do you want to travel?</h2>
           </div>
 
           <p>
-            Find the best bus routes across Hyderabad and get real-time
-            information for your journey.
+            Search real-time bus schedules, direct corridors, and live GPS telemetry
+            across Hyderabad.
           </p>
         </div>
 
         <form onSubmit={handleSearch} className="journey-form">
           <div className="journey-input">
-            <MapPin size={20} />
+            <MapPin size={22} />
             <div>
-              <label>FROM</label>
+              <label>FROM STATION</label>
               <input
                 type="text"
                 list="stops-list"
@@ -136,9 +151,9 @@ function SearchBox() {
           <div className="journey-divider"></div>
 
           <div className="journey-input">
-            <Search size={20} />
+            <Search size={22} />
             <div>
-              <label>TO</label>
+              <label>TO DESTINATION</label>
               <input
                 type="text"
                 list="stops-list"
@@ -156,107 +171,279 @@ function SearchBox() {
           </datalist>
 
           <button type="submit" className="journey-button">
-            Search buses
+            Search Buses
             <ArrowRight size={18} />
           </button>
         </form>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: "16px",
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
           <button
             type="button"
             onClick={handleUseCurrentLocation}
             className="location-button"
-            style={{ cursor: "pointer" }}
           >
-            <MapPin size={16} />
-            Use my current location (Secunderabad)
+            <MapPin size={15} color="#06b6d4" />
+            <span>Use current location (Secunderabad Stn)</span>
           </button>
 
-          <div style={{ fontSize: "12px", color: "#64748b" }}>
-            Popular: <span style={{ textDecoration: "underline", cursor: "pointer", marginRight: 8 }} onClick={() => { setFromLocation("Secunderabad Station"); setToLocation("Charminar"); handleSearch(); }}>Charminar</span>
-            <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => { setFromLocation("Secunderabad Station"); setToLocation("Gachibowli"); handleSearch(); }}>Gachibowli IT</span>
+          <div
+            style={{
+              fontSize: "13px",
+              color: "var(--text-muted)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span>Popular Destinations:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setFromLocation("Secunderabad Station");
+                setToLocation("Charminar");
+                handleSearch();
+              }}
+              style={{
+                background: "rgba(99, 102, 241, 0.12)",
+                border: "1px solid rgba(99, 102, 241, 0.3)",
+                color: "#a5b4fc",
+                padding: "4px 10px",
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Charminar (Old City)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFromLocation("Secunderabad Station");
+                setToLocation("Gachibowli");
+                handleSearch();
+              }}
+              style={{
+                background: "rgba(6, 182, 212, 0.12)",
+                border: "1px solid rgba(6, 182, 212, 0.3)",
+                color: "#67e8f9",
+                padding: "4px 10px",
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Gachibowli IT Corridor
+            </button>
           </div>
         </div>
 
         {/* Live Search Results Container */}
         {searchResults && (
-          <div style={{ marginTop: "24px", borderTop: "1px solid #e2e8f0", paddingTop: "20px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a" }}>
-                Found {searchResults.length} Direct Transit Options
-              </h3>
-              <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 600 }}>
-                ● Live Fleet Active
-              </span>
+          <div
+            style={{
+              marginTop: "28px",
+              borderTop: "1px solid var(--border-glass)",
+              paddingTop: "24px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "18px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Sparkles size={18} color="#818cf8" />
+                <h3
+                  style={{
+                    fontSize: "17px",
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Found {searchResults.length} Direct Transit Options
+                </h3>
+              </div>
+              <div className="beacon-live">
+                <span className="beacon-dot"></span>
+                <span>Active Live Tracking</span>
+              </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: searchResults.length > 1 ? "1fr 1fr" : "1fr", gap: "16px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  searchResults.length > 1
+                    ? "repeat(auto-fit, minmax(320px, 1fr))"
+                    : "1fr",
+                gap: "20px",
+              }}
+            >
               {searchResults.map((res) => (
                 <div
                   key={res.id}
+                  className="search-result-card"
                   style={{
-                    background: "#f8fafc",
-                    border: "1px solid #cbd5e1",
-                    borderRadius: "12px",
-                    padding: "16px",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    gap: "12px",
+                    gap: "16px",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ background: "#2563eb", color: "white", padding: "3px 8px", borderRadius: "6px", fontSize: "13px", fontWeight: 700 }}>
-                          Route {res.route_code}
+                  <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <span
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #4f46e5, #06b6d4)",
+                            color: "white",
+                            padding: "4px 10px",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: 800,
+                            fontFamily: "var(--font-mono)",
+                            boxShadow: "0 0 12px rgba(99, 102, 241, 0.4)",
+                          }}
+                        >
+                          Line {res.route_code}
                         </span>
-                        <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", background: "#e2e8f0", padding: "2px 6px", borderRadius: "4px" }}>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            color: "#34d399",
+                            background: "rgba(16, 185, 129, 0.12)",
+                            border: "1px solid rgba(16, 185, 129, 0.25)",
+                            padding: "3px 8px",
+                            borderRadius: "6px",
+                          }}
+                        >
                           {res.status}
                         </span>
                       </div>
-                      <h4 style={{ fontSize: "14px", fontWeight: 700, marginTop: "6px", color: "#1e293b" }}>
-                        {res.name}
-                      </h4>
+                      <div style={{ textAlign: "right" }}>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontSize: "18px",
+                            fontWeight: 800,
+                            color: "#ffffff",
+                          }}
+                        >
+                          {res.fare}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "var(--text-muted)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          EST. FARE
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "16px", fontWeight: 800, color: "#0f172a" }}>{res.fare}</div>
-                      <div style={{ fontSize: "11px", color: "#64748b" }}>approx. fare</div>
-                    </div>
+
+                    <h4
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: 700,
+                        color: "#f8fafc",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {res.name}
+                    </h4>
                   </div>
 
-                  <div style={{ display: "flex", gap: "16px", fontSize: "12px", color: "#475569" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <Clock size={13} color="#2563eb" /> {res.duration}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "18px",
+                      fontSize: "13px",
+                      color: "var(--text-body)",
+                      padding: "10px 14px",
+                      background: "rgba(255, 255, 255, 0.03)",
+                      borderRadius: "10px",
+                      border: "1px solid var(--border-glass)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <Clock size={15} color="#818cf8" />
+                      <span>{res.duration}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <Bus size={13} color="#16a34a" /> {res.frequency}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <Bus size={15} color="#34d399" />
+                      <span>{res.frequency}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <MapPin size={13} color="#ea580c" /> {res.stopsCount} stops
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <MapPin size={15} color="#38bdf8" />
+                      <span>{res.stopsCount} stops</span>
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => handleTrackRoute(res.id)}
+                    className="primary-button"
                     style={{
                       width: "100%",
-                      padding: "10px",
-                      background: "#2563eb",
-                      color: "white",
-                      borderRadius: "8px",
-                      border: "none",
-                      fontWeight: 600,
+                      padding: "11px",
                       fontSize: "13px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
                       justifyContent: "center",
-                      gap: "6px",
+                      cursor: "pointer",
                     }}
                   >
-                    <Navigation size={14} /> Track Live On Map
+                    <Navigation size={15} />
+                    Track Corridor on Live Map
                   </button>
                 </div>
               ))}
