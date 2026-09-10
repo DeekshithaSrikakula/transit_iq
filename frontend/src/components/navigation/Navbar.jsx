@@ -1,36 +1,32 @@
-import { BusFront, Menu, UserRound } from "lucide-react";
+import { BusFront, Menu, UserRound, Navigation, Radio, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-container">
-        <a href="/" className="navbar-brand">
+        <Link to="/" className="navbar-brand">
           <div className="brand-icon">
             <BusFront size={20} />
           </div>
-
           <span>TransitIQ</span>
-        </a>
+        </Link>
 
         <nav className="navbar-links">
-          <a href="/" className="active">
+          <Link to="/" className="active">
             Home
-          </a>
-          <a href="/plan">Plan Trip</a>
-          <a href="/track">Live Buses</a>
-          <a href="/routes">Routes</a>
-          <a href="/about">About</a>
+          </Link>
+          <a href="#journey-planner">Plan Trip</a>
+          <Link to="/passenger">Live Buses</Link>
+          <Link to="/driver">Driver Portal</Link>
+          <Link to="/operator">Operator Radar</Link>
         </nav>
 
         <div className="navbar-actions">
-          <a href="/login" className="login-button">
+          <Link to="/login" className="login-button">
             <UserRound size={16} />
             Sign in
-          </a>
-
-          <button className="mobile-menu-button">
-            <Menu size={21} />
-          </button>
+          </Link>
         </div>
       </div>
     </header>

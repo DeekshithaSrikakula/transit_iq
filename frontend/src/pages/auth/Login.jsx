@@ -16,8 +16,8 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("passenger");
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("passenger@test.com");
+  const [password, setPassword] = useState("password");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -169,6 +169,16 @@ function Login() {
   const changeRole = (newRole) => {
     setRole(newRole);
     setError("");
+    if (newRole === "passenger") {
+      setEmail("passenger@test.com");
+      setPassword("password");
+    } else if (newRole === "driver") {
+      setEmail("driver@test.com");
+      setPassword("password");
+    } else if (newRole === "operator") {
+      setEmail("operator@test.com");
+      setPassword("password");
+    }
   };
 
   return (
