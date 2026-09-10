@@ -337,12 +337,14 @@ app.get("/", (req, res) => {
 });
 
 // ===================================================
+// ===================================================
 // CREATE HTTP & WEBSOCKET SERVER
 // ===================================================
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 
 const subscribers = new Set();
+const manuallyControlledBuses = new Set();
 
 wss.on("connection", (ws, request) => {
   const url = request.url;
@@ -354,8 +356,10 @@ wss.on("connection", (ws, request) => {
     subscribers.add(ws);
     // Send immediate initial bus positions
     BUSES.forEach((bus) => {
-      ws.send(JSON.stringify({ bus_id: bus.id, license_plate: bus.license_plate, latitude: bus.latitude, longitude: bus.longitude, speed: bus.speed, status: bus.status }));
+      ws.send(JSON.stringify({ bus_id: bus.id, license_plate: bus.license_plate, latitude: bus.latitude, longitude: bus.longitude, speed: bus.speed, route_id: bus.route_id || 1, status: bus.status }));
     });
+  } else {
+    manuallyControlledBuses.add(busId);
   }
 
   ws.on("message", (raw) => {
@@ -368,6 +372,7 @@ wss.on("connection", (ws, request) => {
         bus.longitude = data.longitude;
         bus.speed = data.speed || 35;
         bus.status = "active";
+        bus.route_id = data.route_id || bus.route_id || 1;
       }
 
       // Broadcast to all connected passenger and operator sockets
@@ -392,9 +397,75 @@ wss.on("connection", (ws, request) => {
   });
 
   ws.on("close", () => {
-    subscribers.delete(ws);
+    if (isDriver) {
+      manuallyControlledBuses.delete(busId);
+    } else {
+      subscribers.delete(ws);
+    }
   });
 });
+
+// ===================================================
+// CONTINUOUS FLEET TELEMETRY SIMULATION
+// ===================================================
+const busSimulationState = {
+  1: { stopIndex: 0, stepRatio: 0.1, routeId: 1 },
+  2: { stopIndex: 2, stepRatio: 0.4, routeId: 2 },
+  3: { stopIndex: 5, stepRatio: 0.7, routeId: 1 },
+};
+
+setInterval(() => {
+  [1, 2, 3].forEach((busId) => {
+    if (manuallyControlledBuses.has(busId)) return;
+
+    const sim = busSimulationState[busId];
+    if (!sim) return;
+
+    const route = ROUTES.find((r) => r.id === sim.routeId);
+    if (!route || !route.stop_ids) return;
+
+    const stopList = route.stop_ids.map((id) => STOPS.find((s) => s.id === id)).filter(Boolean);
+    if (stopList.length < 2) return;
+
+    sim.stepRatio += 0.04;
+    if (sim.stepRatio >= 1.0) {
+      sim.stepRatio = 0;
+      sim.stopIndex = (sim.stopIndex + 1) % stopList.length;
+    }
+
+    const p1 = stopList[sim.stopIndex];
+    const p2 = stopList[(sim.stopIndex + 1) % stopList.length];
+
+    const lat = p1.latitude + (p2.latitude - p1.latitude) * sim.stepRatio;
+    const lng = p1.longitude + (p2.longitude - p1.longitude) * sim.stepRatio;
+    const simSpeed = Math.floor(34 + Math.sin(Date.now() / 4000) * 10);
+
+    const bus = BUSES.find((b) => b.id === busId);
+    if (bus) {
+      bus.latitude = lat;
+      bus.longitude = lng;
+      bus.speed = simSpeed;
+      bus.status = "active";
+      bus.route_id = sim.routeId;
+    }
+
+    const payload = JSON.stringify({
+      bus_id: busId,
+      license_plate: bus ? bus.license_plate : `TS-09-UA-${1000 + busId}`,
+      latitude: lat,
+      longitude: lng,
+      speed: simSpeed,
+      route_id: sim.routeId,
+      status: "active",
+    });
+
+    for (const client of subscribers) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(payload);
+      }
+    }
+  });
+}, 2000);
 
 server.on("upgrade", (request, socket, head) => {
   if (request.url.includes("/tracking/ws") || request.url.includes("/ws/")) {

@@ -90,6 +90,7 @@ function TransitMap({
   center = [17.42, 78.47],
   zoom = 12,
   onStopClick,
+  onBusClick,
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -151,18 +152,18 @@ function TransitMap({
     if (routeLine && routeLine.length > 1) {
       // Outer ambient glow line
       glowPolylineRef.current = L.polyline(routeLine, {
-        color: "#3b82f6",
+        color: "#6366f1",
         weight: 10,
-        opacity: 0.25,
+        opacity: 0.28,
         lineCap: "round",
         lineJoin: "round",
       }).addTo(map);
 
       // Inner crisp solid line
       routePolylineRef.current = L.polyline(routeLine, {
-        color: "#1d4ed8",
-        weight: 4.5,
-        opacity: 0.9,
+        color: "#38bdf8",
+        weight: 4,
+        opacity: 0.95,
         lineCap: "round",
         lineJoin: "round",
       }).addTo(map);
@@ -177,21 +178,26 @@ function TransitMap({
           icon: createStopIcon(stop.sequence !== undefined ? stop.sequence : index),
         });
 
+        const seqNum = (stop.sequence !== undefined ? stop.sequence : index) + 1;
         marker.bindPopup(`
-          <div style="font-family: inherit; padding: 6px;">
-            <div style="font-size: 11px; font-weight: 700; color: #0284c7; text-transform: uppercase; letter-spacing: 0.04em;">
-              Station #${(stop.sequence !== undefined ? stop.sequence : index) + 1}
+          <div style="font-family: inherit; padding: 4px; min-width: 160px;">
+            <div style="font-size: 10px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.06em;">
+              Station #${seqNum}
             </div>
-            <strong style="color: #0f172a; font-size: 14px; display: block; margin-top: 2px;">${stop.name}</strong>
-            <div style="color: #64748b; font-size: 11px; margin-top: 4px;">Hyderabad Metropolitan Transit</div>
+            <strong style="color: #ffffff; font-size: 14px; display: block; margin-top: 2px;">${stop.name}</strong>
+            <div style="color: #94a3b8; font-size: 11px; margin-top: 4px;">Hyderabad Metropolitan Transit</div>
           </div>
         `);
 
-        if (onStopClick) marker.on("click", () => onStopClick(stop));
+        marker.on("click", () => {
+          map.flyTo([stop.latitude, stop.longitude], Math.max(map.getZoom(), 14), { duration: 0.8 });
+          if (onStopClick) onStopClick(stop);
+        });
+
         marker.addTo(markersLayerRef.current);
       }
     });
-  }, [stops, routeLine]);
+  }, [stops, routeLine, onStopClick]);
 
   // Update Bus markers
   useEffect(() => {
@@ -208,25 +214,31 @@ function TransitMap({
           zIndexOffset: 1000,
         });
 
+        const speedVal = bus.speed ? `${Math.round(bus.speed)} km/h` : "Stationary";
         marker.bindPopup(`
-          <div style="font-family: inherit; padding: 8px; min-width: 170px;">
+          <div style="font-family: inherit; padding: 6px; min-width: 170px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <strong style="color: #0f172a; font-size: 14px;">${bus.license_plate || `Bus ${bus.bus_id}`}</strong>
-              <span style="background: #ecfdf5; color: #047857; font-size: 10px; font-weight: 700; padding: 2px 6px; borderRadius: 6px; text-transform: uppercase;">
+              <strong style="color: #ffffff; font-size: 13px; font-family: monospace;">${bus.license_plate || `Bus ${bus.bus_id}`}</strong>
+              <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase;">
                 ${bus.status || "Active"}
               </span>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #475569; border-top: 1px solid #f1f5f9; padding-top: 6px;">
-              <span>Telemetry Speed:</span>
-              <strong style="color: #2563eb;">${bus.speed ? `${Math.round(bus.speed)} km/h` : "Stationary"}</strong>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
+              <span>Speed:</span>
+              <strong style="color: #38bdf8;">${speedVal}</strong>
             </div>
           </div>
         `);
 
+        marker.on("click", () => {
+          map.flyTo([bus.latitude, bus.longitude], Math.max(map.getZoom(), 15), { duration: 0.8 });
+          if (onBusClick) onBusClick(bus);
+        });
+
         marker.addTo(busesLayerRef.current);
       }
     });
-  }, [buses]);
+  }, [buses, onBusClick]);
 
   return (
     <div
@@ -234,10 +246,10 @@ function TransitMap({
       style={{
         height,
         width: "100%",
-        borderRadius: "16px",
+        borderRadius: "14px",
         overflow: "hidden",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-        border: "1px solid #e2e8f0",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+        border: "1px solid var(--border-glass, rgba(255,255,255,0.08))",
       }}
     />
   );

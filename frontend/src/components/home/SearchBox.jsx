@@ -115,7 +115,7 @@ function SearchBox() {
         })
       );
     }
-    navigate("/passenger");
+    navigate(`/passenger?route=${routeId}`);
   };
 
   return (
