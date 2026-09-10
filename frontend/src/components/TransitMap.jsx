@@ -109,11 +109,11 @@ function TransitMap({
         zoomControl: true,
       });
 
-      // CartoDB Voyager tiles (crisp & modern)
+      // Standard OpenStreetMap tiles (100% free, no API key, zero watermarks)
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
-          attribution: "&copy; OpenStreetMap &copy; CARTO",
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           maxZoom: 19,
         }
       ).addTo(map);

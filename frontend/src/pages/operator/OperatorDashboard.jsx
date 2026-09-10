@@ -6,11 +6,10 @@ import {
   MapPin,
   RefreshCw,
   Shield,
-  Users,
-  Route as RouteIcon,
   Navigation,
   Radio,
   LogOut,
+  Route as RouteIcon,
   Activity,
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -45,13 +44,34 @@ function OperatorDashboard() {
     if (user.role !== targetRole) {
       if (targetRole === "passenger") {
         localStorage.setItem("transitiq_token", "demo_passenger");
-        localStorage.setItem("transitiq_user", JSON.stringify({ name: "Passenger", role: "passenger", email: "passenger@test.com" }));
+        localStorage.setItem(
+          "transitiq_user",
+          JSON.stringify({
+            name: "Passenger",
+            role: "passenger",
+            email: "passenger@test.com",
+          })
+        );
       } else if (targetRole === "driver") {
         localStorage.setItem("transitiq_token", "demo_driver");
-        localStorage.setItem("transitiq_user", JSON.stringify({ name: "Mohammad Ali", role: "driver", email: "driver@test.com" }));
+        localStorage.setItem(
+          "transitiq_user",
+          JSON.stringify({
+            name: "Mohammad Ali",
+            role: "driver",
+            email: "driver@test.com",
+          })
+        );
       } else {
         localStorage.setItem("transitiq_token", "demo_op");
-        localStorage.setItem("transitiq_user", JSON.stringify({ name: "Rajesh Kumar", role: "operator", email: "operator@test.com" }));
+        localStorage.setItem(
+          "transitiq_user",
+          JSON.stringify({
+            name: "Rajesh Kumar",
+            role: "operator",
+            email: "operator@test.com",
+          })
+        );
       }
     }
     navigate(path);
@@ -59,7 +79,10 @@ function OperatorDashboard() {
 
   // Clock
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date().toLocaleTimeString()), 1000);
+    const timer = setInterval(
+      () => setCurrentTime(new Date().toLocaleTimeString()),
+      1000
+    );
     return () => clearInterval(timer);
   }, []);
 
@@ -131,227 +154,633 @@ function OperatorDashboard() {
   }));
 
   return (
-    <div className="tiq-dashboard-container">
-      {/* Top Enterprise Command Nav */}
-      <header className="tiq-top-nav">
-        <Link to="/" className="tiq-brand-badge">
-          <div className="tiq-brand-icon-box" style={{ background: "linear-gradient(135deg, #059669, #047857)" }}>
-            <Shield size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: "16px", fontWeight: 800, letterSpacing: "-0.02em" }}>
-              Transit<span style={{ color: "#059669" }}>IQ</span>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--bg-base)",
+        backgroundImage:
+          "radial-gradient(circle at 12% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%), radial-gradient(circle at 88% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 40%)",
+        color: "var(--text-heading)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Top Navigation Bar */}
+      <header className="navbar">
+        <div className="navbar-container">
+          <Link to="/" className="navbar-brand">
+            <div className="brand-icon">
+              <Shield size={20} />
             </div>
-            <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 500 }}>
-              CENTRAL DISPATCH & RADAR
-            </div>
-          </div>
-        </Link>
+            <span>TransitIQ</span>
+          </Link>
 
-        {/* Navigation Tabs */}
-        <nav className="tiq-nav-pill-group">
-          <button
-            onClick={() => switchToPortal("passenger", "/passenger")}
-            className="tiq-nav-pill"
-            style={{ background: "none", border: "none", cursor: "pointer" }}
-          >
-            <Navigation size={15} /> Passenger Hub
-          </button>
-          <button
-            onClick={() => switchToPortal("driver", "/driver")}
-            className="tiq-nav-pill"
-            style={{ background: "none", border: "none", cursor: "pointer" }}
-          >
-            <Radio size={15} /> Driver Cockpit
-          </button>
-          <button
-            onClick={() => switchToPortal("operator", "/operator")}
-            className="tiq-nav-pill active"
-            style={{ background: "none", border: "none", cursor: "pointer" }}
-          >
-            <Shield size={15} /> Operator Radar
-          </button>
-        </nav>
-
-        {/* Time & Controller Info */}
-        <div className="tiq-user-status-card">
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(10, 16, 28, 0.7)", padding: "6px 14px", borderRadius: "10px", border: "1px solid var(--border-glass)", fontSize: "12px", fontWeight: 700, color: "#ffffff", fontFamily: "var(--font-mono)" }}>
-            <Clock3 size={14} color="#06b6d4" /> {currentTime} IST
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingLeft: "12px", borderLeft: "1px solid var(--surface-border)" }}>
-            <div className="tiq-avatar" style={{ background: "#ecfdf5", color: "#065f46", borderColor: "#a7f3d0" }}>
-              {user.name ? user.name.slice(0, 2).toUpperCase() : "OP"}
-            </div>
-            <div>
-              <div style={{ fontSize: "13px", fontWeight: 700 }}>{user.name || "Rajesh Kumar"}</div>
-              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Chief Dispatcher</div>
-            </div>
+          {/* Navigation Pills */}
+          <nav className="navbar-links">
             <button
-              onClick={handleLogout}
-              style={{ background: "transparent", border: "none", color: "var(--text-subtle)", padding: "4px", cursor: "pointer", marginLeft: "6px" }}
-              title="Sign out"
+              onClick={() => switchToPortal("passenger", "/passenger")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--text-body)",
+                fontFamily: "inherit",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "8px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
             >
-              <LogOut size={16} />
+              <Navigation size={14} /> Passenger Hub
             </button>
+            <button
+              onClick={() => switchToPortal("driver", "/driver")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--text-body)",
+                fontFamily: "inherit",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "8px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <Radio size={14} /> Driver Cockpit
+            </button>
+            <button
+              onClick={() => switchToPortal("operator", "/operator")}
+              className="active"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              <Shield size={14} /> Operator Radar
+            </button>
+          </nav>
+
+          {/* Time & Controller Status */}
+          <div className="navbar-actions">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "rgba(10, 16, 28, 0.8)",
+                padding: "6px 14px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-glass)",
+                fontSize: "12px",
+                fontWeight: 700,
+                color: "#ffffff",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              <Clock3 size={14} color="#06b6d4" /> {currentTime} IST
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "6px 12px",
+                  background: "rgba(16, 185, 129, 0.15)",
+                  border: "1px solid rgba(16, 185, 129, 0.3)",
+                  borderRadius: "10px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "6px",
+                    background: "linear-gradient(135deg, #059669, #10b981)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "11px",
+                    fontWeight: 800,
+                  }}
+                >
+                  {user.name ? user.name[0].toUpperCase() : "O"}
+                </div>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#ffffff" }}>
+                  {user.name || "Rajesh Kumar"}
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                title="Sign out"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid var(--border-glass)",
+                  color: "var(--text-muted)",
+                  padding: "8px",
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Workspace */}
-      <main style={{ maxWidth: "1380px", width: "100%", margin: "0 auto", padding: "28px 32px", flex: 1 }}>
-        {/* KPI Metrics Banner */}
-        <div className="tiq-kpi-grid">
-          <div className="tiq-kpi-card">
-            <div className="tiq-kpi-header">
-              <span className="tiq-kpi-title">ACTIVE FLEET COVERAGE</span>
-              <div className="tiq-kpi-icon" style={{ background: "#ecfdf5", color: "#059669" }}>
-                <BusFront size={18} />
+      {/* Main Workspace - Neatly aligned to 1280px */}
+      <main
+        style={{
+          maxWidth: "1280px",
+          width: "100%",
+          margin: "0 auto",
+          padding: "32px 24px",
+          flex: 1,
+        }}
+      >
+        {/* Header Title Section */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            marginBottom: "24px",
+            flexWrap: "wrap",
+            gap: "16px",
+          }}
+        >
+          <div>
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 800,
+                color: "#10b981",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
+              CENTRAL DISPATCH & FLEET SURVEILLANCE
+            </span>
+            <h1
+              style={{
+                fontSize: "30px",
+                fontWeight: 800,
+                color: "#ffffff",
+                marginTop: "4px",
+              }}
+            >
+              Fleet Command Radar
+            </h1>
+            <p style={{ fontSize: "14px", color: "var(--text-body)", marginTop: "4px" }}>
+              City-wide telemetry surveillance, live incident triage dispatch, and master fleet rosters.
+            </p>
+          </div>
+
+          <button
+            onClick={fetchData}
+            className="secondary-button"
+            style={{
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 18px",
+            }}
+          >
+            <RefreshCw
+              size={14}
+              style={{ animation: refreshing ? "spin 1s linear infinite" : "none" }}
+            />
+            <span>Refresh Fleet Data</span>
+          </button>
+        </div>
+
+        {/* 4 KPI Cards - Home page style */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: "20px",
+            marginBottom: "28px",
+          }}
+        >
+          {/* KPI 1 */}
+          <div className="glass-panel" style={{ padding: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "10px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                ACTIVE FLEET
+              </span>
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
+                  background: "rgba(16, 185, 129, 0.15)",
+                  color: "#34d399",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <BusFront size={16} />
               </div>
             </div>
-            <div className="tiq-kpi-value" style={{ color: "#059669" }}>
-              {activeBusesCount} <span style={{ fontSize: "16px", color: "var(--text-subtle)", fontWeight: 600 }}>/ {buses.length}</span>
+            <div
+              style={{
+                fontSize: "24px",
+                fontWeight: 800,
+                color: "#34d399",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              {activeBusesCount} / {buses.length}
             </div>
-            <div className="tiq-kpi-subtitle">
+            <div style={{ fontSize: "13px", color: "var(--text-body)", marginTop: "4px" }}>
               100% active transit availability
             </div>
           </div>
 
-          <div className="tiq-kpi-card">
-            <div className="tiq-kpi-header">
-              <span className="tiq-kpi-title">TRANSIT CORRIDORS</span>
-              <div className="tiq-kpi-icon" style={{ background: "#eff6ff", color: "#2563eb" }}>
-                <RouteIcon size={18} />
+          {/* KPI 2 */}
+          <div className="glass-panel" style={{ padding: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "10px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                TRANSIT CORRIDORS
+              </span>
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
+                  background: "rgba(99, 102, 241, 0.15)",
+                  color: "#818cf8",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <RouteIcon size={16} />
               </div>
             </div>
-            <div className="tiq-kpi-value" style={{ color: "#2563eb" }}>
-              {routes.length} <span style={{ fontSize: "16px", color: "var(--text-subtle)", fontWeight: 600 }}>Lines</span>
+            <div
+              style={{
+                fontSize: "24px",
+                fontWeight: 800,
+                color: "#ffffff",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              {routes.length} Lines
             </div>
-            <div className="tiq-kpi-subtitle">
+            <div style={{ fontSize: "13px", color: "var(--text-body)", marginTop: "4px" }}>
               Core North-South & IT Corridors
             </div>
           </div>
 
-          <div className="tiq-kpi-card">
-            <div className="tiq-kpi-header">
-              <span className="tiq-kpi-title">MONITORED STATIONS</span>
-              <div className="tiq-kpi-icon" style={{ background: "#f0fdf4", color: "#16a34a" }}>
-                <MapPin size={18} />
+          {/* KPI 3 */}
+          <div className="glass-panel" style={{ padding: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "10px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                MONITORED STATIONS
+              </span>
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
+                  background: "rgba(6, 182, 212, 0.15)",
+                  color: "#38bdf8",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MapPin size={16} />
               </div>
             </div>
-            <div className="tiq-kpi-value" style={{ color: "#0f172a" }}>
-              {stops.length} <span style={{ fontSize: "16px", color: "var(--text-subtle)", fontWeight: 600 }}>Terminals</span>
+            <div
+              style={{
+                fontSize: "24px",
+                fontWeight: 800,
+                color: "#38bdf8",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              {stops.length} Stations
             </div>
-            <div className="tiq-kpi-subtitle">
+            <div style={{ fontSize: "13px", color: "var(--text-body)", marginTop: "4px" }}>
               Hyderabad Metropolitan Network
             </div>
           </div>
 
-          <div className="tiq-kpi-card">
-            <div className="tiq-kpi-header">
-              <span className="tiq-kpi-title">DISPATCH TRIAGE ALERTS</span>
-              <div className="tiq-kpi-icon" style={{ background: pendingIncidents.length > 0 ? "#fef2f2" : "#ecfdf5", color: pendingIncidents.length > 0 ? "#dc2626" : "#059669" }}>
-                <AlertTriangle size={18} />
+          {/* KPI 4 */}
+          <div className="glass-panel" style={{ padding: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "10px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                DISPATCH ALERTS
+              </span>
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
+                  background:
+                    pendingIncidents.length > 0
+                      ? "rgba(244, 63, 94, 0.15)"
+                      : "rgba(16, 185, 129, 0.15)",
+                  color: pendingIncidents.length > 0 ? "#f43f5e" : "#34d399",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <AlertTriangle size={16} />
               </div>
             </div>
-            <div className="tiq-kpi-value" style={{ color: pendingIncidents.length > 0 ? "#dc2626" : "#059669" }}>
-              {pendingIncidents.length} <span style={{ fontSize: "16px", color: "var(--text-subtle)", fontWeight: 600 }}>Pending</span>
+            <div
+              style={{
+                fontSize: "24px",
+                fontWeight: 800,
+                color: pendingIncidents.length > 0 ? "#f43f5e" : "#34d399",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              {pendingIncidents.length} Pending
             </div>
-            <div className="tiq-kpi-subtitle">
-              {pendingIncidents.length > 0 ? "Requires controller triage" : "Normal traffic flow"}
+            <div style={{ fontSize: "13px", color: "var(--text-body)", marginTop: "4px" }}>
+              {pendingIncidents.length > 0
+                ? "Requires triage dispatch"
+                : "All corridors normal"}
             </div>
           </div>
         </div>
 
         {/* Fleet Radar & Incident Resolution Queue */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: "24px", marginBottom: "28px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 380px",
+            gap: "24px",
+            marginBottom: "28px",
+            alignItems: "start",
+          }}
+        >
           {/* City Radar Map */}
-          <div className="tiq-panel" style={{ display: "flex", flexDirection: "column" }}>
-            <div className="tiq-panel-header">
+          <div className="glass-panel" style={{ padding: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "14px",
+              }}
+            >
               <div>
-                <div className="tiq-panel-title">City-Wide Fleet Radar</div>
-                <div className="tiq-panel-subtitle">Live real-time positioning across all active Hyderabad buses</div>
+                <span
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: 800,
+                    color: "#10b981",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  METROPOLITAN RADAR
+                </span>
+                <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff" }}>
+                  City-Wide Fleet Radar
+                </h3>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div className="tiq-live-beacon">
-                  <span className="tiq-beacon-dot"></span> Radar Streaming
-                </div>
-                <button
-                  onClick={fetchData}
-                  style={{ display: "flex", alignItems: "center", gap: "6px", background: "var(--surface-ground)", border: "1px solid var(--surface-border)", padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
-                >
-                  <RefreshCw size={13} style={{ animation: refreshing ? "spin 1s linear infinite" : "none" }} /> Sync
-                </button>
+              <div className="beacon-live">
+                <span className="beacon-dot"></span>
+                <span>Streaming Telemetry</span>
               </div>
             </div>
 
-            <div style={{ flex: 1, minHeight: "480px" }}>
+            <div
+              style={{
+                height: "460px",
+                borderRadius: "14px",
+                overflow: "hidden",
+                border: "1px solid var(--border-glass)",
+              }}
+            >
               <TransitMap stops={mapStops} buses={mapBuses} height="100%" />
             </div>
           </div>
 
           {/* Incident Triage Queue */}
-          <div className="tiq-panel" style={{ display: "flex", flexDirection: "column" }}>
-            <div className="tiq-panel-header">
+          <div
+            className="glass-panel"
+            style={{ padding: "24px", display: "flex", flexDirection: "column" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}
+            >
               <div>
-                <div className="tiq-panel-title">Incident Triage Queue</div>
-                <div className="tiq-panel-subtitle">Driver delay alerts & emergency notifications</div>
+                <h3 style={{ fontSize: "17px", fontWeight: 700, color: "#ffffff" }}>
+                  Incident Triage
+                </h3>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
+                  Driver delay alerts & hazards
+                </div>
               </div>
-              <span style={{ fontSize: "11px", fontWeight: 700, background: pendingIncidents.length > 0 ? "#fee2e2" : "#f1f5f9", color: pendingIncidents.length > 0 ? "#dc2626" : "var(--text-muted)", padding: "3px 8px", borderRadius: "6px" }}>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  background:
+                    pendingIncidents.length > 0
+                      ? "rgba(244, 63, 94, 0.15)"
+                      : "rgba(16, 185, 129, 0.15)",
+                  border: `1px solid ${
+                    pendingIncidents.length > 0
+                      ? "rgba(244, 63, 94, 0.3)"
+                      : "rgba(16, 185, 129, 0.3)"
+                  }`,
+                  color: pendingIncidents.length > 0 ? "#f43f5e" : "#34d399",
+                  padding: "4px 10px",
+                  borderRadius: "8px",
+                }}
+              >
                 {pendingIncidents.length} Open
               </span>
             </div>
 
-            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "12px", maxHeight: "440px" }}>
+            <div
+              style={{
+                maxHeight: "400px",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+                paddingRight: "4px",
+              }}
+            >
               {incidents.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "48px 24px", color: "var(--text-subtle)", fontSize: "13px" }}>
-                  <CheckCircle2 size={36} color="#10b981" style={{ margin: "0 auto 8px" }} />
-                  <div style={{ fontWeight: 700, color: "var(--text-main)" }}>No Active Disruptions</div>
-                  <div>All corridors operating normally without reported delays.</div>
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "48px 20px",
+                    color: "var(--text-muted)",
+                    fontSize: "13px",
+                  }}
+                >
+                  <CheckCircle2 size={36} color="#10b981" style={{ margin: "0 auto 10px" }} />
+                  <div style={{ fontWeight: 700, color: "#ffffff" }}>No Disruptions</div>
+                  <div style={{ marginTop: "4px" }}>
+                    All corridors operating normally without reported delays.
+                  </div>
                 </div>
               ) : (
                 incidents.map((inc) => (
                   <div
                     key={inc.id}
                     style={{
-                      padding: "16px",
+                      padding: "14px",
                       borderRadius: "12px",
-                      background: inc.status === "resolved" ? "var(--surface-ground)" : "#fef2f2",
-                      border: `1px solid ${inc.status === "resolved" ? "var(--surface-border)" : "#fecaca"}`,
+                      background:
+                        inc.status === "resolved"
+                          ? "rgba(10, 16, 28, 0.5)"
+                          : "rgba(244, 63, 94, 0.08)",
+                      border: `1px solid ${
+                        inc.status === "resolved"
+                          ? "var(--border-glass)"
+                          : "rgba(244, 63, 94, 0.3)"
+                      }`,
                       display: "flex",
                       flexDirection: "column",
                       gap: "8px",
-                      transition: "all 0.2s ease",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{
-                        fontSize: "11px",
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.04em",
-                        color: inc.status === "resolved" ? "#16a34a" : "#dc2626"
-                      }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: inc.status === "resolved" ? "#34d399" : "#f43f5e",
+                        }}
+                      >
                         {inc.type} ALERT
                       </span>
-                      <span style={{
-                        fontSize: "10px",
-                        padding: "2px 8px",
-                        borderRadius: "10px",
-                        fontWeight: 700,
-                        background: inc.status === "resolved" ? "#dcfce7" : "#fee2e2",
-                        color: inc.status === "resolved" ? "#15803d" : "#b91c1c"
-                      }}>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          padding: "2px 8px",
+                          borderRadius: "6px",
+                          fontWeight: 700,
+                          background:
+                            inc.status === "resolved"
+                              ? "rgba(16, 185, 129, 0.15)"
+                              : "rgba(244, 63, 94, 0.15)",
+                          color: inc.status === "resolved" ? "#34d399" : "#fda4af",
+                        }}
+                      >
                         {inc.status}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-main)" }}>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#ffffff" }}>
                       {inc.description}
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "8px", marginTop: "4px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderTop: "1px solid var(--border-glass)",
+                        paddingTop: "8px",
+                        marginTop: "2px",
+                      }}
+                    >
                       <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                         Driver: {inc.driver_name || "Mohammad Ali"}
                       </span>
@@ -362,7 +791,7 @@ function OperatorDashboard() {
                           style={{
                             padding: "6px 12px",
                             borderRadius: "6px",
-                            background: "#16a34a",
+                            background: "linear-gradient(135deg, #059669, #10b981)",
                             color: "white",
                             border: "none",
                             fontSize: "11px",
@@ -371,10 +800,10 @@ function OperatorDashboard() {
                             display: "flex",
                             alignItems: "center",
                             gap: "4px",
-                            boxShadow: "0 2px 6px rgba(22, 163, 74, 0.3)"
+                            boxShadow: "0 2px 8px rgba(16, 185, 129, 0.3)",
                           }}
                         >
-                          <CheckCircle2 size={13} /> Mark Resolved
+                          <CheckCircle2 size={12} /> Mark Resolved
                         </button>
                       )}
                     </div>
@@ -386,11 +815,22 @@ function OperatorDashboard() {
         </div>
 
         {/* Master Fleet Roster Table */}
-        <div className="tiq-panel">
-          <div className="tiq-panel-header">
+        <div className="glass-panel" style={{ padding: "24px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "18px",
+            }}
+          >
             <div>
-              <div className="tiq-panel-title">Active Fleet Roster & Duty Assignments</div>
-              <div className="tiq-panel-subtitle">Current shifts, assigned routes, and vehicle telemetry statuses</div>
+              <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff" }}>
+                Active Fleet Roster & Duty Assignments
+              </h3>
+              <div style={{ fontSize: "13px", color: "var(--text-body)", marginTop: "2px" }}>
+                Current shifts, assigned corridors, and vehicle telemetry status
+              </div>
             </div>
           </div>
 
@@ -409,7 +849,7 @@ function OperatorDashboard() {
                 {schedules.map((s) => (
                   <tr key={s.id}>
                     <td>
-                      <div style={{ fontWeight: 700, color: "var(--text-main)" }}>
+                      <div style={{ fontWeight: 700, color: "#ffffff" }}>
                         Route {s.route.route_code}
                       </div>
                       <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
@@ -417,7 +857,13 @@ function OperatorDashboard() {
                       </div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 700, color: "var(--text-main)" }}>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          color: "#ffffff",
+                          fontFamily: "var(--font-mono)",
+                        }}
+                      >
                         {s.bus.license_plate}
                       </div>
                       <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
@@ -425,29 +871,54 @@ function OperatorDashboard() {
                       </div>
                     </td>
                     <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#f3e8ff", color: "#6b21a8", fontSize: "11px", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            background: "rgba(99, 102, 241, 0.2)",
+                            color: "#a5b4fc",
+                            fontSize: "11px",
+                            fontWeight: 800,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1px solid rgba(99, 102, 241, 0.3)",
+                          }}
+                        >
                           {s.driver_name.slice(0, 2).toUpperCase()}
                         </div>
-                        <span style={{ fontWeight: 600 }}>{s.driver_name}</span>
+                        <span style={{ fontWeight: 600, color: "#ffffff" }}>
+                          {s.driver_name}
+                        </span>
                       </div>
                     </td>
-                    <td style={{ fontWeight: 600, color: "var(--text-muted)" }}>
+                    <td
+                      style={{
+                        fontWeight: 600,
+                        color: "var(--text-body)",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
                       {s.start_time} - {s.end_time}
                     </td>
                     <td>
-                      <span style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        background: "#ecfdf5",
-                        color: "#059669",
-                        padding: "4px 10px",
-                        borderRadius: "20px",
-                        fontSize: "11px",
-                        fontWeight: 700
-                      }}>
-                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }}></span>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          background: "rgba(16, 185, 129, 0.12)",
+                          border: "1px solid rgba(16, 185, 129, 0.3)",
+                          color: "#34d399",
+                          padding: "4px 10px",
+                          borderRadius: "20px",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        <span className="beacon-dot"></span>
                         Active on Route
                       </span>
                     </td>
